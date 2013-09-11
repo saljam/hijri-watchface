@@ -1,7 +1,6 @@
 #include "pebble_os.h"
 #include "pebble_app.h"
 #include "pebble_fonts.h"
-#include "src/resource_ids.auto.h"
 #include "hijri.h"
 #include "layout.h"
 
