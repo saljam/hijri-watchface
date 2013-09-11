@@ -3,6 +3,7 @@
 #include "pebble_fonts.h"
 #include "src/resource_ids.auto.h"
 #include "hijri.h"
+#include "layout.h"
 
 #define MY_UUID { 0xAF, 0x59, 0x80, 0xFF, 0x41, 0xFA, 0x44, 0x43, 0x85, 0x9F, 0x99, 0xEE, 0xD9, 0x9E, 0x51, 0xA2 }
 PBL_APP_INFO(MY_UUID,
@@ -11,56 +12,50 @@ PBL_APP_INFO(MY_UUID,
 	DEFAULT_MENU_ICON,
 	APP_INFO_WATCH_FACE);
 
-Window window;
-TextLayer hijriLayer;
-TextLayer dateLayer;
-TextLayer timeLayer;
+char hijriText[] = "Jumada al-awwal 16";
+char dateText[] = "September 15";
+char timeText[] = "00:00";
+
+void updateHijri(AppContextRef ctx, int t)
+{
+	HijriDate hijri = unix2hijri(t);
+	snprintf(hijriText, sizeof(hijriText), "%s %d", hijriMonths[hijri.month], hijri.day);	
+	text_layer_set_text(&hijriLayer, hijriText);
+}
+
+void updateGregorian(AppContextRef ctx, PblTm *t)
+{
+	string_format_time(dateText, sizeof(dateText), "%B %e", t);
+	text_layer_set_text(&dateLayer, dateText);
+}
+
+void updateTime(AppContextRef ctx, PblTm *t)
+{
+	string_format_time(timeText, sizeof(timeText), "%H:%M", t);
+	text_layer_set_text(&timeLayer, timeText);
+}
 
 void handle_tick(AppContextRef ctx, PebbleTickEvent *t)
 {
-	HijriDate hijri = unix2hijri(time(NULL));
-	static char hijriText[] = "Jumada al-awwal 16";
-	snprintf(hijriText, sizeof(hijriText), "%s %d", hijriMonths[hijri.month], hijri.day);	
-	text_layer_set_text(&hijriLayer, hijriText);
-	
-	PblTm now;
-	get_time(&now);
-	static char timeText[] = "00:00";
-	string_format_time(timeText, sizeof(timeText), "%H:%M", &now);
-	text_layer_set_text(&timeLayer, timeText);
-	
-	static char dateText[] = "September 15";
-	string_format_time(dateText, sizeof(dateText), "%B %e", &now);
-	text_layer_set_text(&dateLayer, dateText);
+	updateTime(ctx, t->tick_time);
+	// Only update the date on a new day
+	if (t->tick_time->tm_hour == 0 && t->tick_time->tm_min == 0) {
+		updateGregorian(ctx, t->tick_time);
+		updateHijri(ctx, time(NULL));
+	}
 }
 
 void handle_init(AppContextRef ctx)
 {
-	window_init(&window, "Hijri");
-	window_stack_push(&window, true);
-	window_set_background_color(&window, GColorBlack);
-	
 	resource_init_current_app(&APP_RESOURCES);
 	
-	text_layer_init(&hijriLayer, GRect(8, 20, 144-8, 168-68));
-	text_layer_set_text_color(&hijriLayer, GColorWhite);
-	text_layer_set_background_color(&hijriLayer, GColorClear);
-	text_layer_set_font(&hijriLayer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_CONDENSED_21)));
-	layer_add_child(&window.layer, &hijriLayer.layer);
+	init_layout();
 	
-	text_layer_init(&timeLayer, GRect(8, 50, 144-8, 168-92));
-	text_layer_set_text_color(&timeLayer, GColorWhite);
-	text_layer_set_background_color(&timeLayer, GColorClear);
-	text_layer_set_font(&timeLayer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_BOLD_SUBSET_49)));
-	layer_add_child(&window.layer, &timeLayer.layer);
-	
-	text_layer_init(&dateLayer, GRect(8, 115, 144-8, 168-92));
-	text_layer_set_text_color(&dateLayer, GColorWhite);
-	text_layer_set_background_color(&dateLayer, GColorClear);
-	text_layer_set_font(&dateLayer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_ROBOTO_CONDENSED_21)));
-	layer_add_child(&window.layer, &dateLayer.layer);
-	
-	handle_tick(ctx, NULL);
+	PblTm now;
+	get_time(&now);
+	updateTime(ctx, &now);
+	updateGregorian(ctx, &now);
+	updateHijri(ctx, time(NULL));
 }
 
 void pbl_main(void *params)
