@@ -1,18 +1,29 @@
-
-{"friendlyVersion": "VERSION",
- "versionDefName": "APP_RESOURCES",
- "media": [
+{
+    "friendlyVersion": "VERSION",
+    "versionDefName": "APP_RESOURCES",
+    "media": [
         {
-        "type": "font",
-        "defName": "FONT_ROBOTO_CONDENSED_21",
-        "file": "fonts/Roboto-Condensed.ttf"
+            "type": "font",
+            "characterRegex": "ARABIC",
+            "defName": "FONT_KACSTBOOK_26",
+            "file": "fonts/KacstBook.ttf"
         },
-
         {
-        "type": "font",
-        "characterRegex": "[:0-9]",
-        "defName": "FONT_ROBOTO_BOLD_SUBSET_49",
-        "file": "fonts/Roboto-Bold.ttf"
+            "type": "font",
+            "characterRegex": "ARABICNUM",
+            "defName": "FONT_KACSTBOOK_SUBSET_55",
+            "file": "fonts/KacstBook.ttf"
+        },
+        {
+            "type": "font",
+            "defName": "FONT_ROBOTO_CONDENSED_21",
+            "file": "fonts/Roboto-Condensed.ttf"
+        },
+        {
+            "type": "font",
+            "characterRegex": "[:0-9]",
+            "defName": "FONT_ROBOTO_BOLD_SUBSET_49",
+            "file": "fonts/Roboto-Bold.ttf"
         }
-	  ]
+    ]
 }
