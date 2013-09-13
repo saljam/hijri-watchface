@@ -4,8 +4,7 @@ typedef struct {
 	int day;
 } HijriDate;
 
-extern char * hijriMonths[];
-extern char * arabicDigit[];
+extern wchar_t * hijriMonths[];
 
 HijriDate unix2hijri(int t);
-int shape(char *in, char *out, int n);
+int shape(wchar_t *in, int n);

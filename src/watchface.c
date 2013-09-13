@@ -1,9 +1,16 @@
+#include <stdio.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <locale.h>
+
 #include "pebble_os.h"
 #include "pebble_app.h"
 #include "pebble_fonts.h"
+
 #include "hijri.h"
 #include "src/resource_ids.auto.h"
 #include "layout.h"
+#include "ConvertUTF.h"
 
 #define MY_UUID { 0xAF, 0x59, 0x80, 0xFF, 0x41, 0xFA, 0x44, 0x43, 0x85, 0x9F, 0x99, 0xEE, 0xD9, 0x9E, 0x51, 0xA2 }
 PBL_APP_INFO(MY_UUID,
@@ -13,22 +20,58 @@ PBL_APP_INFO(MY_UUID,
 	APP_INFO_WATCH_FACE);
 
 #define LABEL_LEN 128
+#define INTWIDTH 4
 
-char timeTxt[LABEL_LEN];
-char arTimeTxt[LABEL_LEN];
-char hijriTxt[LABEL_LEN];
-char arHijriTxt[LABEL_LEN];
+wchar_t timeTxt[LABEL_LEN];
+char utfTimeTxt[LABEL_LEN];
+wchar_t hijriTxt[LABEL_LEN];
+char utfHijriTxt[LABEL_LEN];
 char dateTxt[LABEL_LEN];
+char debugTxt[LABEL_LEN];
+
+int wifmt(wchar_t *out, int d, int zeros)
+{
+	wchar_t *conv = L"0123456789";
+	int n = 0;
+	wchar_t buf[INTWIDTH + 1], *p;
+	p = buf + INTWIDTH;
+	
+	*p-- = L'\0';
+	while (d) {
+		int i = d % 10;
+		d /= 10;
+		*p-- = conv[i];
+		n++;
+		zeros--;
+	}
+	while (zeros > 0) {
+		*p-- = conv[0];
+		zeros--;
+		n++;
+	}
+	wcscat(out, p+1);
+	return n;
+}
 
 void updateHijri(AppContextRef ctx, int t)
 {
 	HijriDate hijri = unix2hijri(t);
 	
-	snprintf(hijriTxt, sizeof(hijriTxt), "%d %s", hijri.day, hijriMonths[hijri.month]);
+	// Can't use swprintf becaues it uses the heap. Until that's fixed we do it manually.
+	//swprintf(hijriTxt, sizeof(hijriTxt), L"%d %s", hijri.day, hijriMonths[hijri.month]);
+	*hijriTxt = L'\0';
+	wifmt(hijriTxt, hijri.day, 1);
+	wcscat(hijriTxt, L" ");
+	wcscat(hijriTxt, hijriMonths[hijri.month]);
 	
-	shape(hijriTxt, arHijriTxt, sizeof(arHijriTxt));
+	shape(hijriTxt, sizeof(hijriTxt));
 	
-	text_layer_set_text(&hijriLayer, arHijriTxt);
+	//setlocale(LC_ALL, "en_US.utf8");
+	//wcstombs(utfHijriTxt, hijriTxt, sizeof hijriTxt);
+	const UTF32 * pA = (UTF32*)hijriTxt;
+	UTF8 * pB = ( UTF8*)utfHijriTxt;
+	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
+	text_layer_set_text(&hijriLayer, utfHijriTxt);
 }
 
 void updateGregorian(AppContextRef ctx, PblTm *t)
@@ -39,9 +82,17 @@ void updateGregorian(AppContextRef ctx, PblTm *t)
 
 void updateTime(AppContextRef ctx, PblTm *t)
 {
-	string_format_time(timeTxt, sizeof(timeTxt), "%H:%M", t);
-	shape(timeTxt, arTimeTxt, sizeof(arTimeTxt));
-	text_layer_set_text(&timeLayer, arTimeTxt);
+	*timeTxt = L'\0';
+	wifmt(timeTxt, t->tm_hour, 2);
+	wcscat(timeTxt, L":");
+	wifmt(timeTxt, t->tm_min, 2);
+	
+	shape(timeTxt, sizeof(timeTxt));
+	
+	const UTF32 * pA = (UTF32*)timeTxt;
+	UTF8 * pB = ( UTF8*)utfTimeTxt;
+	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
+	text_layer_set_text(&timeLayer, utfTimeTxt);
 }
 
 void handle_tick(AppContextRef ctx, PebbleTickEvent *t)

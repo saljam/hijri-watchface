@@ -1,5 +1,6 @@
+#include <wctype.h>
+#include <wchar.h>
 #include "hijri.h"
-#include <ctype.h>
 
 #define secondsPerMinute 60
 #define secondsPerHour (60 * 60)
@@ -20,17 +21,17 @@ int daysPerYear[] = {
 	355, 354, 354, 355, 354, 355, 354, 354, 355, 354,
 };
 
-char * easternDigit[] = {
-	"\u0660",
-	"\u0661",
-	"\u0662",
-	"\u0663",
-	"\u0664",
-	"\u0665",
-	"\u0666",
-	"\u0667",
-	"\u0668",
-	"\u0669",
+wchar_t easternDigit[] = {
+	L'\u0660',
+	L'\u0661',
+	L'\u0662',
+	L'\u0663',
+	L'\u0664',
+	L'\u0665',
+	L'\u0666',
+	L'\u0667',
+	L'\u0668',
+	L'\u0669',
 };
 
 char * hijriMonthsEn[] = {
@@ -48,40 +49,36 @@ char * hijriMonthsEn[] = {
 	"Dhu al-Hijjah",
 };
 
-char * hijriMonths[] = {
-	"محرم",
-	"صفر",
-	"ربيع الأول",
-	"ربيع الآخر",
-	"جمادى الأولى",
-	"جمادى الآخرة",
-	"رجب",
-	"شعبان",
-	"رمضان",
-	"شوال",
-	"\uFE93\uFEAA\uFECC\uFED8\uFEDF\uFE8D \uFEED\uFEAB", //"ذو القعدة",
-	"ذو الحجة",
+wchar_t * hijriMonths[] = {
+	L"محرم",
+	L"صفر",
+	L"ربيع الأول",
+	L"ربيع الآخر",
+	L"جمادى الأولى",
+	L"جمادى الآخرة",
+	L"رجب",
+	L"شعبان",
+	L"رمضان",
+	L"شوال",
+	L"\uFE93\uFEAA\uFECC\uFED8\uFEDF\uFE8D \uFEED\uFEAB", //"ذو القعدة",
+	L"ذو الحجة",
 };
 
 // For now we just do the digits. I should add full alphabet shaping soon.
-int shape(char *in, char *out, int n)
+int shape(wchar_t *in, int n)
 {
-	if (n == 0 || *in == '\0') {
-		*out = *in;
+	if (n == 0 || *in == L'\0') {
 		return 0;
 	}
 	
 	// Reshape ascii digits to eastern
-	if (isdigit((int) *in)) {
-		int d = *in - '0';
-		*out++ = easternDigit[d][0];
-		*out++ = easternDigit[d][1];
-		in++;
-	} else {
-		*out++ = *in++;
+	if (*in >= L'0' && *in <= L'9') {
+		int d = *in - L'0';
+		*in = easternDigit[d];
 	}
 	
-	return shape(in, out, n-1);
+	in++;
+	return shape(in, n-1);
 }
 
 HijriDate unix2hijri(int t)
