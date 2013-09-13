@@ -2,6 +2,7 @@
 #include "pebble_app.h"
 #include "pebble_fonts.h"
 #include "hijri.h"
+#include "src/resource_ids.auto.h"
 #include "layout.h"
 
 #define MY_UUID { 0xAF, 0x59, 0x80, 0xFF, 0x41, 0xFA, 0x44, 0x43, 0x85, 0x9F, 0x99, 0xEE, 0xD9, 0x9E, 0x51, 0xA2 }
@@ -11,27 +12,36 @@ PBL_APP_INFO(MY_UUID,
 	DEFAULT_MENU_ICON,
 	APP_INFO_WATCH_FACE);
 
-char hijriText[] = "Jumada al-awwal 16";
-char dateText[] = "September 15";
-char timeText[] = "00:00";
+#define LABEL_LEN 128
+
+char timeTxt[LABEL_LEN];
+char arTimeTxt[LABEL_LEN];
+char hijriTxt[LABEL_LEN];
+char arHijriTxt[LABEL_LEN];
+char dateTxt[LABEL_LEN];
 
 void updateHijri(AppContextRef ctx, int t)
 {
 	HijriDate hijri = unix2hijri(t);
-	snprintf(hijriText, sizeof(hijriText), "%s %d", hijriMonths[hijri.month], hijri.day);	
-	text_layer_set_text(&hijriLayer, hijriText);
+	
+	snprintf(hijriTxt, sizeof(hijriTxt), "%d %s", hijri.day, hijriMonths[hijri.month]);
+	
+	shape(hijriTxt, arHijriTxt, sizeof(arHijriTxt));
+	
+	text_layer_set_text(&hijriLayer, arHijriTxt);
 }
 
 void updateGregorian(AppContextRef ctx, PblTm *t)
 {
-	string_format_time(dateText, sizeof(dateText), "%B %e", t);
-	text_layer_set_text(&dateLayer, dateText);
+	string_format_time(dateTxt, sizeof(dateTxt), "%B %e", t);
+	text_layer_set_text(&dateLayer, dateTxt);
 }
 
 void updateTime(AppContextRef ctx, PblTm *t)
 {
-	string_format_time(timeText, sizeof(timeText), "%H:%M", t);
-	text_layer_set_text(&timeLayer, timeText);
+	string_format_time(timeTxt, sizeof(timeTxt), "%H:%M", t);
+	shape(timeTxt, arTimeTxt, sizeof(arTimeTxt));
+	text_layer_set_text(&timeLayer, arTimeTxt);
 }
 
 void handle_tick(AppContextRef ctx, PebbleTickEvent *t)
