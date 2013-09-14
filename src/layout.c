@@ -1,7 +1,7 @@
 #include "pebble_os.h"
 #include "pebble_app.h"
 #include "pebble_fonts.h"
-#include "src/resource_ids.auto.h"
+#include "out/res/resource_ids.auto.h"
 #include "layout.h"
 
 #define WIDTH 144
