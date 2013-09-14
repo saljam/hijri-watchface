@@ -16,7 +16,7 @@ CFLAGS = -std=c99 \
 	-g -Os
 CFLAGS += -Wall -Wextra -Werror \
 	-Wno-unused-parameter -Wno-error=unused-function -Wno-error=unused-variable 
-CFLAGS += -fPIE -I. -I$(SDK)/include -DRELEASE
+CFLAGS += -fPIE -I. -I$(SDK)/include -DRELEASE -c
 
 LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,out/pebble-app.map,--emit-relocs
 LDFLAGS += -T$(SDK)/pebble_app.ld
@@ -35,6 +35,9 @@ out/bundle.pbw: dirs $(SDK)/tools/mkbundle.py out/pebble-app.bin resources/src/r
 		--resource-map resources/src/resource_map.json \
 		--resources-timestamp $(NOW)\
 		-o $@ -v
+
+%.o: %.c out/res/resource_ids.auto.h
+	$(CC) $(CFLAGS) $< -o $@
 
 out/pebble-app.elf: $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
