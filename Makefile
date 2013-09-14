@@ -18,7 +18,7 @@ CFLAGS += -Wall -Wextra -Werror \
 	-Wno-unused-parameter -Wno-error=unused-function -Wno-error=unused-variable 
 CFLAGS += -fPIE -I. -I$(SDK)/include -DRELEASE
 
-LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,pebble-app.map,--emit-relocs
+LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,out/pebble-app.map,--emit-relocs
 LDFLAGS += -T$(SDK)/pebble_app.ld
 LIBS = -L$(SDK)/lib -lpebble
 
