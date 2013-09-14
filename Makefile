@@ -51,6 +51,7 @@ out/pebble-app.bin: out/pebble-app.raw.bin out/pebble-app.elf
 
 
 # Resources
+# TODO the rest of /home/s/pebble-sdk/Pebble/sdk/waftools/process_resources.py
 
 FREINDLY_VERSION = VERSION
 VERSION_DEF_NAME = APP_RESOURCES
