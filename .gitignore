@@ -1,5 +1,2 @@
-.waf*
-build
-.lock-waf*
-
-serial_dump.txt
+out
+src/*.o
