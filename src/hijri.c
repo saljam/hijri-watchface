@@ -1,6 +1,7 @@
 #include <wctype.h>
 #include <wchar.h>
 #include "hijri.h"
+#include "shaping.h"
 
 #define secondsPerMinute 60
 #define secondsPerHour (60 * 60)
