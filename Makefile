@@ -53,7 +53,7 @@ $O/pebble-app.bin: $O/pebble-app.raw.bin $O/pebble-app.elf
 
 # Resources
 
-include resources.mk
+include res/res.mk
 
 gen/resource_ids.auto.h: $R/app_resources.pbpack
 	python $(SDK)/tools/generate_resource_code.py \
