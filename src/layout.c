@@ -4,13 +4,13 @@
 #include "gen/resource_ids.auto.h"
 #include "layout.h"
 
-#define WIDTH 144
-#define HEIGHT 168
-
 Window window;
 TextLayer hijriLayer;
 TextLayer dateLayer;
 TextLayer timeLayer;
+
+#define WIDTH 144
+#define HEIGHT 168
 
 void init_layout()
 {

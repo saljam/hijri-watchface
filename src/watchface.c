@@ -21,6 +21,11 @@ PBL_APP_INFO(MY_UUID,
 #define LABEL_LEN 128
 #define INTWIDTH 4
 
+extern Window window;
+extern TextLayer hijriLayer;
+extern TextLayer dateLayer;
+extern TextLayer timeLayer;
+
 wchar_t timeTxt[LABEL_LEN];
 char utfTimeTxt[LABEL_LEN];
 wchar_t hijriTxt[LABEL_LEN];
