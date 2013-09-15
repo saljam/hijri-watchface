@@ -1,2 +1,2 @@
-out
-src/*.o
+bin/
+gen/
