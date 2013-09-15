@@ -2,6 +2,8 @@ NOW := $(shell date '+%N')
 REQ_FW := 1
 SDK := $(PEBBLE_HOME)/Pebble/sdk
 
+O = bin/obj
+R = bin/res
 
 # Code
 
@@ -18,12 +20,9 @@ CFLAGS += -Wall -Wextra -Werror \
 	-Wno-unused-parameter -Wno-error=unused-function -Wno-error=unused-variable 
 CFLAGS += -fPIE -I. -I$(SDK)/include -DRELEASE -c
 
-LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,bin/pebble-app.map,--emit-relocs
+LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,gen/pebble-app.map,--emit-relocs
 LDFLAGS += -T$(SDK)/pebble_app.ld
 LIBS = -L$(SDK)/lib -lpebble
-
-O = bin/obj
-R = bin/res
 
 SOURCES = $(wildcard src/*.c)
 OBJECTS = $(SOURCES:src/%.c=$O/%.o)
@@ -53,19 +52,8 @@ $O/pebble-app.bin: $O/pebble-app.raw.bin $O/pebble-app.elf
 
 
 # Resources
-# TODO the rest of /home/s/pebble-sdk/Pebble/sdk/waftools/process_resources.py
 
-FREINDLY_VERSION = VERSION
-VERSION_DEF_NAME = APP_RESOURCES
-RESOURCES = $R/FONT_KACSTBOOK_26.pfo
-$R/FONT_KACSTBOOK_26.pfo: res/fonts/KacstBook.ttf
-	python $(SDK)/tools/font/fontgen.py pfo 26 --filter '[ :0-9٠-٩ﺍ-ﻳ]' $< $@
-RESOURCES += $R/FONT_KACSTBOOK_SUBSET_55.pfo
-$R/FONT_KACSTBOOK_SUBSET_55.pfo: res/fonts/KacstBook.ttf
-	python $(SDK)/tools/font/fontgen.py pfo 55 --filter '[ :٠-٩]' $< $@
-RESOURCES += $R/FONT_ROBOTO_CONDENSED_21.pfo
-$R/FONT_ROBOTO_CONDENSED_21.pfo: res/fonts/Roboto-Condensed.ttf
-	python $(SDK)/tools/font/fontgen.py pfo 21 $< $@
+include resources.mk
 
 gen/resource_ids.auto.h: $R/app_resources.pbpack
 	python $(SDK)/tools/generate_resource_code.py \
@@ -98,5 +86,6 @@ clean:
 	$(RM) $(RESOURCES)
 	$(RM) $O/pebble-app.bin $O/pebble-app.raw.bin $O/pebble-app.elf
 	$(RM) $R/app_resources.pbpack.table $R/app_resources.pbpack.manifest $R/app_resources.pbpack.data $R/app_resources.pbpack
-	$(RM) gen/resource_ids.auto.h
+	$(RM) gen/resource_ids.auto.h gen/pebble-app.map
 	$(RM) bin/bundle.pbw
+	rmdir $O $R bin gen
