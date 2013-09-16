@@ -64,11 +64,12 @@ void updateHijri(AppContextRef ctx, int t)
 	// Can't use swprintf becaues it uses the heap. Until that's fixed we do it manually.
 	//swprintf(hijriTxt, sizeof(hijriTxt), L"%d %s", hijri.day, hijriMonths[hijri.month]);
 	*hijriTxt = L'\0';
-	wifmt(hijriTxt, hijri.day, 1);
-	wcscat(hijriTxt, L" ");
 	wcscat(hijriTxt, hijriMonths[hijri.month]);
-	
 	shape(hijriTxt, sizeof(hijriTxt));
+	wcscat(hijriTxt, L" ");
+	wifmt(hijriTxt, hijri.day, 1);
+	shape(hijriTxt, sizeof(hijriTxt));
+	
 	
 	//setlocale(LC_ALL, "en_US.utf8");
 	//wcstombs(utfHijriTxt, hijriTxt, sizeof hijriTxt);
@@ -80,7 +81,7 @@ void updateHijri(AppContextRef ctx, int t)
 
 void updateGregorian(AppContextRef ctx, PblTm *t)
 {
-	string_format_time(dateTxt, sizeof(dateTxt), "%B %e", t);
+	string_format_time(dateTxt, sizeof(dateTxt), "%e %B", t);
 	text_layer_set_text(&dateLayer, dateTxt);
 }
 
