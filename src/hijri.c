@@ -61,25 +61,64 @@ wchar_t * hijriMonths[] = {
 	L"شعبان",
 	L"رمضان",
 	L"شوال",
-	L"\uFE93\uFEAA\uFECC\uFED8\uFEDF\uFE8D \uFEED\uFEAB", //"ذو القعدة",
+	L"ذو القعدة", //"\uFE93\uFEAA\uFECC\uFED8\uFEDF\uFE8D \uFEED\uFEAB",
 	L"ذو الحجة",
 };
 
-// For now we just do the digits. I should add full alphabet shaping soon.
+void strrev(wchar_t *start, int n)
+{
+	wchar_t *end = start;
+	while (*end !=  L'\0' && end < start+n) {
+		end++;
+	}
+	end--;
+	
+	while (start < end) {
+		wchar_t tmp = *start;
+		*start++ = *end;
+		*end-- = tmp;
+	}
+}
+
 int shape(wchar_t *in, int n)
 {
-	if (n == 0 || *in == L'\0') {
-		return 0;
+	int rev = 0;
+	enum joiningType prev = U;
+	int i;
+	for (i = 0; i < n && in[i] != L'\0'; i++) {
+		// numeral
+		if (in[i] >= L'0' && in[i] <= L'9') {
+			int d = in[i] - L'0';
+			in[i] = easternDigit[d];
+		} else if (in[i] >= L'؀' && in[i] <= L'ۿ') {
+			rev = 1;
+			enum joiningType next = U;
+			if (in[i+1] >= L'؀' && in[i+1] <= L'ۿ') {
+				next = joinTable[in[i+1] - joinTableOffset];
+			}
+			wchar_t g;
+			if (prev & L && next & R) {
+				g = arConv[in[i] - joinTableOffset].medial;
+			} else if (prev & L) {
+				g = arConv[in[i] - joinTableOffset].final;
+			} else if (next & R) {
+				g = arConv[in[i] - joinTableOffset].initial;
+			} else {
+				g = arConv[in[i] - joinTableOffset].isolated;
+			}
+			prev = joinTable[in[i] - joinTableOffset];
+			in[i] = g;
+		} else {
+			prev = U;
+		}
 	}
 	
-	// Reshape ascii digits to eastern
-	if (*in >= L'0' && *in <= L'9') {
-		int d = *in - L'0';
-		*in = easternDigit[d];
+	// Reverse the string if it has arabic. Not really good enough but does the job for date names on a watch...
+	if (rev) {
+		strrev(in, n);	
 	}
-	
-	in++;
-	return shape(in, n-1);
+
+	return i;
 }
 
 HijriDate unix2hijri(int t)
