@@ -89,3 +89,7 @@ clean:
 	$(RM) gen/resource_ids.auto.h gen/pebble-app.map
 	$(RM) bin/bundle.pbw
 	rmdir $O $R bin gen
+
+.PHONY: install
+install: bin/bundle.pbw
+	scp bin/bundle.pbw 0x65.net:www/misc
