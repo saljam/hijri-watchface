@@ -1,3 +1,6 @@
+// This file was generated from ArabicShaping.txt from the Unicode Character Database
+// TODO(s) write a script that does this automatically, instead of a series of Edits
+
 enum joiningType {
 	R = 1,
 	L = 2,
