@@ -1,3 +1,5 @@
+APPNAME := hijri
+
 NOW := $(shell date '+%N')
 REQ_FW := 1
 SDK := $(PEBBLE_HOME)/Pebble/sdk
@@ -20,14 +22,14 @@ CFLAGS += -Wall -Wextra -Werror \
 	-Wno-unused-parameter -Wno-error=unused-function -Wno-error=unused-variable 
 CFLAGS += -fPIE -I. -I$(SDK)/include -DRELEASE -c
 
-LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,gen/pebble-app.map,--emit-relocs
+LDFLAGS = -mcpu=cortex-m3 -mthumb -Wl,--gc-sections -Wl,--warn-common -Os -fPIE -Wl,-Map,gen/pebble-app.map,--emit-relocs -nostdlib
 LDFLAGS += -T$(SDK)/pebble_app.ld
 LIBS = -L$(SDK)/lib -lpebble
 
 SOURCES = $(wildcard src/*.c)
 OBJECTS = $(SOURCES:src/%.c=$O/%.o)
 
-bin/bundle.pbw: dirs $(SDK)/tools/mkbundle.py $O/pebble-app.bin res/resource_map.json $R/app_resources.pbpack
+bin/$(APPNAME).pbw: dirs $(SDK)/tools/mkbundle.py $O/pebble-app.bin res/resource_map.json $R/app_resources.pbpack
 	python $(SDK)/tools/mkbundle.py \
 		--watchapp $O/pebble-app.bin \
 		--watchapp-timestamp $(NOW) \
@@ -46,7 +48,7 @@ $O/pebble-app.elf: $(OBJECTS)
 $O/pebble-app.raw.bin: $O/pebble-app.elf
 	arm-none-eabi-objcopy -R .stack -R .bss -O binary $< $@
 
-$O/pebble-app.bin: $O/pebble-app.raw.bin $O/pebble-app.elf
+$O/pebble-app.bin: $O/pebble-app.raw.bin
 	cp $< $@
 	python $(SDK)/waftools/inject_metadata.py $@
 
@@ -87,9 +89,9 @@ clean:
 	$(RM) $O/pebble-app.bin $O/pebble-app.raw.bin $O/pebble-app.elf
 	$(RM) $R/app_resources.pbpack.table $R/app_resources.pbpack.manifest $R/app_resources.pbpack.data $R/app_resources.pbpack
 	$(RM) gen/resource_ids.auto.h gen/pebble-app.map
-	$(RM) bin/bundle.pbw
-	rmdir $O $R bin gen
+	$(RM) bin/$(APPNAME).pbw
+	-rmdir $O $R bin gen
 
 .PHONY: install
-install: bin/bundle.pbw
-	scp bin/bundle.pbw 0x65.net:www/misc
+install: bin/$(APPNAME).pbw
+	scp $< 0x65.net:www/misc
