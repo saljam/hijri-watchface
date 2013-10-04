@@ -18,7 +18,7 @@ PBL_APP_INFO(MY_UUID,
 	DEFAULT_MENU_ICON,
 	APP_INFO_WATCH_FACE);
 
-#define LABEL_LEN 128
+#define LABEL_LEN 255
 #define INTWIDTH 4
 
 extern Window window;
@@ -30,8 +30,8 @@ wchar_t timeTxt[LABEL_LEN];
 char utfTimeTxt[LABEL_LEN];
 wchar_t hijriTxt[LABEL_LEN];
 char utfHijriTxt[LABEL_LEN];
-char dateTxt[LABEL_LEN];
-char debugTxt[LABEL_LEN];
+wchar_t dateTxt[LABEL_LEN];
+char utfDateTxt[LABEL_LEN];
 
 int wifmt(wchar_t *out, int d, int zeros)
 {
@@ -57,22 +57,17 @@ int wifmt(wchar_t *out, int d, int zeros)
 	return n;
 }
 
-void updateHijri(AppContextRef ctx, int t)
+void updateHijri(AppContextRef ctx, time_t t)
 {
 	HijriDate hijri = unix2hijri(t);
 	
 	// Can't use swprintf becaues it uses the heap. Until that's fixed we do it manually.
 	//swprintf(hijriTxt, sizeof(hijriTxt), L"%d %s", hijri.day, hijriMonths[hijri.month]);
 	*hijriTxt = L'\0';
-	wcscat(hijriTxt, hijriMonths[hijri.month]);
-	shape(hijriTxt, sizeof(hijriTxt));
+	wcscat(hijriTxt, hijriMonths[hijri.month]); shape(hijriTxt, sizeof(hijriTxt));
 	wcscat(hijriTxt, L" ");
-	wifmt(hijriTxt, hijri.day, 1);
-	shape(hijriTxt, sizeof(hijriTxt));
+	wifmt(hijriTxt, hijri.day, 1); shape(hijriTxt, sizeof(hijriTxt));
 	
-	
-	//setlocale(LC_ALL, "en_US.utf8");
-	//wcstombs(utfHijriTxt, hijriTxt, sizeof hijriTxt);
 	const UTF32 * pA = (UTF32*)hijriTxt;
 	UTF8 * pB = ( UTF8*)utfHijriTxt;
 	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
@@ -81,8 +76,15 @@ void updateHijri(AppContextRef ctx, int t)
 
 void updateGregorian(AppContextRef ctx, PblTm *t)
 {
-	string_format_time(dateTxt, sizeof(dateTxt), "%e %B", t);
-	text_layer_set_text(&dateLayer, dateTxt);
+	*dateTxt = L'\0';
+	wcscat(dateTxt, arGregorianMonths[t->tm_mon]); shape(dateTxt, sizeof(dateTxt));
+	wcscat(dateTxt, L" ");
+	wifmt(dateTxt, t->tm_mday, 1); shape(dateTxt, sizeof(dateTxt));
+	
+	const UTF32 * pA = (UTF32*)dateTxt;
+	UTF8 * pB = ( UTF8*)utfDateTxt;
+	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
+	text_layer_set_text(&dateLayer, utfDateTxt);
 }
 
 void updateTime(AppContextRef ctx, PblTm *t)
@@ -91,7 +93,6 @@ void updateTime(AppContextRef ctx, PblTm *t)
 	wifmt(timeTxt, t->tm_hour, 2);
 	wcscat(timeTxt, L":");
 	wifmt(timeTxt, t->tm_min, 2);
-	
 	shape(timeTxt, sizeof(timeTxt));
 	
 	const UTF32 * pA = (UTF32*)timeTxt;

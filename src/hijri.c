@@ -61,8 +61,23 @@ wchar_t * hijriMonths[] = {
 	L"شعبان",
 	L"رمضان",
 	L"شوال",
-	L"ذو القعدة", //"\uFE93\uFEAA\uFECC\uFED8\uFEDF\uFE8D \uFEED\uFEAB",
+	L"ذو القعدة",
 	L"ذو الحجة",
+};
+
+wchar_t * arGregorianMonths[] = {
+	L"يناير",
+	L"فبراير",
+	L"مارس",
+	L"أبريل",
+	L"مايو",
+	L"يونيو",
+	L"يوليو",
+	L"أغسطس",
+	L"سبتمبر",
+	L"أكتوبر",
+	L"نوفمبر",
+	L"ديسمبر",
 };
 
 void strrev(wchar_t *start, int n)

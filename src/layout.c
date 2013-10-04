@@ -47,7 +47,7 @@ void init_layout()
 	text_layer_set_background_color(&dateLayer, GColorClear);
 	text_layer_set_font(&dateLayer,
 		fonts_load_custom_font(
-			resource_get_handle(RESOURCE_ID_FONT_ROBOTO_CONDENSED_21)));
+			resource_get_handle(RESOURCE_ID_FONT_KACSTBOOK_26)));
 	layer_add_child(&window.layer, &dateLayer.layer);
 	
 }
