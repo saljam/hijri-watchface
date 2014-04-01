@@ -1,0 +1,41 @@
+{
+  "uuid": "0fd3e627-b9b0-4abf-aef3-54855d70f425",
+  "shortName": "hijri-watch",
+  "longName": "hijri-watch",
+  "companyName": "0x65.net",
+  "versionCode": 2,
+  "versionLabel": "2.0.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": [
+        {
+            "type": "font",
+            "characterRegex": "[ :؀-ۿﭐ-﷿ﹰ-﻿]",
+            "name": "FONT_KACSTBOOK_26",
+            "file": "fonts/KacstBook.ttf"
+        },
+        {
+            "type": "font",
+            "characterRegex": "[ :٠-٩]",
+            "name": "FONT_KACSTBOOK_SUBSET_55",
+            "file": "fonts/KacstBook.ttf"
+        },
+        {
+            "type": "font",
+            "name": "FONT_ROBOTO_CONDENSED_21",
+            "file": "fonts/Roboto-Condensed.ttf"
+        },
+        {
+            "type": "font",
+            "characterRegex": "[:0-9]",
+            "name": "FONT_ROBOTO_BOLD_SUBSET_49",
+            "file": "fonts/Roboto-Bold.ttf"
+        }
+    ]
+  }
+}

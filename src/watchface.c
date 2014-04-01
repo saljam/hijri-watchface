@@ -3,28 +3,21 @@
 #include <wctype.h>
 #include <locale.h>
 
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "gen/resource_ids.auto.h"
+#include <pebble.h>
 
 #include "hijri.h"
-#include "layout.h"
 #include "ConvertUTF.h"
-
-#define MY_UUID { 0xAF, 0x59, 0x80, 0xFF, 0x41, 0xFA, 0x44, 0x43, 0x85, 0x9F, 0x99, 0xEE, 0xD9, 0x9E, 0x51, 0xA2 }
-PBL_APP_INFO(MY_UUID,
-	"Hijri", "0x65.net",
-	1, 0,
-	DEFAULT_MENU_ICON,
-	APP_INFO_WATCH_FACE);
 
 #define LABEL_LEN 255
 #define INTWIDTH 4
 
-extern Window window;
-extern TextLayer hijriLayer;
-extern TextLayer dateLayer;
-extern TextLayer timeLayer;
+#define WIDTH 144
+#define HEIGHT 168
+
+Window *window;
+TextLayer *hijriLayer;
+TextLayer *dateLayer;
+TextLayer *timeLayer;
 
 wchar_t timeTxt[LABEL_LEN];
 char utfTimeTxt[LABEL_LEN];
@@ -57,7 +50,7 @@ int wifmt(wchar_t *out, int d, int zeros)
 	return n;
 }
 
-void updateHijri(AppContextRef ctx, time_t t)
+void updateHijri(time_t t)
 {
 	HijriDate hijri = unix2hijri(t);
 	
@@ -71,10 +64,10 @@ void updateHijri(AppContextRef ctx, time_t t)
 	const UTF32 * pA = (UTF32*)hijriTxt;
 	UTF8 * pB = ( UTF8*)utfHijriTxt;
 	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
-	text_layer_set_text(&hijriLayer, utfHijriTxt);
+	text_layer_set_text(hijriLayer, utfHijriTxt);
 }
 
-void updateGregorian(AppContextRef ctx, PblTm *t)
+void updateGregorian(struct tm *t)
 {
 	*dateTxt = L'\0';
 	wcscat(dateTxt, arGregorianMonths[t->tm_mon]); shape(dateTxt, sizeof(dateTxt));
@@ -84,10 +77,10 @@ void updateGregorian(AppContextRef ctx, PblTm *t)
 	const UTF32 * pA = (UTF32*)dateTxt;
 	UTF8 * pB = ( UTF8*)utfDateTxt;
 	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
-	text_layer_set_text(&dateLayer, utfDateTxt);
+	text_layer_set_text(dateLayer, utfDateTxt);
 }
 
-void updateTime(AppContextRef ctx, PblTm *t)
+void updateTime(struct tm *t)
 {
 	*timeTxt = L'\0';
 	wifmt(timeTxt, t->tm_hour, 2);
@@ -98,40 +91,71 @@ void updateTime(AppContextRef ctx, PblTm *t)
 	const UTF32 * pA = (UTF32*)timeTxt;
 	UTF8 * pB = ( UTF8*)utfTimeTxt;
 	ConvertUTF32toUTF8(&pA, pA + 15, &pB, pB + 30, lenientConversion);
-	text_layer_set_text(&timeLayer, utfTimeTxt);
+	text_layer_set_text(timeLayer, utfTimeTxt);
 }
 
-void handle_tick(AppContextRef ctx, PebbleTickEvent *t)
+void handleTick(struct tm *t, TimeUnits units_changed)
 {
-	updateTime(ctx, t->tick_time);
+	updateTime(t);
 	// Only update the date on a new day
-	if (t->tick_time->tm_hour == 0 && t->tick_time->tm_min == 0) {
-		updateGregorian(ctx, t->tick_time);
-		updateHijri(ctx, time(NULL));
+	if (t->tm_hour == 0 && t->tm_min == 0) {
+		updateGregorian(t);
+		updateHijri(time(NULL));
 	}
 }
 
-void handle_init(AppContextRef ctx)
+void initLayout()
 {
-	resource_init_current_app(&APP_RESOURCES);
+	window = window_create();
+	window_stack_push(window, true);
+	window_set_background_color(window, GColorBlack);
 	
-	init_layout();
+	int margin = 8;
+	int top = 10;
+	int width = WIDTH-2*margin;
+	int dateHeight = 32;
+	int timeHeight = 80;
 	
-	PblTm now;
-	get_time(&now);
-	updateTime(ctx, &now);
-	updateGregorian(ctx, &now);
-	updateHijri(ctx, time(NULL));
+	hijriLayer = text_layer_create(GRect(margin, top, width, dateHeight));
+	text_layer_set_text_alignment(hijriLayer, GTextAlignmentRight);
+	text_layer_set_text_color(hijriLayer, GColorWhite);
+	text_layer_set_background_color(hijriLayer, GColorClear);
+	text_layer_set_font(hijriLayer,
+		fonts_load_custom_font(
+			resource_get_handle(RESOURCE_ID_FONT_KACSTBOOK_26)));
+	layer_add_child((Layer *)window, (Layer *)hijriLayer);
+	
+	timeLayer = text_layer_create(GRect(margin, top+dateHeight, width, timeHeight));
+	text_layer_set_text_alignment(timeLayer, GTextAlignmentCenter);
+	text_layer_set_text_color(timeLayer, GColorWhite);
+	text_layer_set_background_color(timeLayer, GColorClear);
+	text_layer_set_font(timeLayer,
+		fonts_load_custom_font(
+			resource_get_handle(RESOURCE_ID_FONT_KACSTBOOK_SUBSET_55)));
+	layer_add_child((Layer *)window, (Layer *)timeLayer);
+	
+	dateLayer = text_layer_create(GRect(margin, top+dateHeight+timeHeight, width, dateHeight));
+	text_layer_set_text_color(dateLayer, GColorWhite);
+	text_layer_set_background_color(dateLayer, GColorClear);
+	text_layer_set_font(dateLayer,
+		fonts_load_custom_font(
+			resource_get_handle(RESOURCE_ID_FONT_KACSTBOOK_26)));
+	layer_add_child((Layer *)window, (Layer *)dateLayer);
 }
 
-void pbl_main(void *params)
+
+int main(void)
 {
-	PebbleAppHandlers handlers = {
-		.init_handler = &handle_init,
-		.tick_info = {
-			.tick_handler = &handle_tick,
-			.tick_units = MINUTE_UNIT
-		}
-	};
-	app_event_loop(params, &handlers);
+	initLayout();
+	
+	time_t unix = time(NULL);
+	struct tm *local = localtime(&unix);
+	updateTime(local);
+	updateGregorian(local);
+	updateHijri(unix);
+	free(local);
+	
+	tick_timer_service_subscribe(MINUTE_UNIT, &handleTick);
+	
+	app_event_loop();
 }
