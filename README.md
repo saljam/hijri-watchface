@@ -6,9 +6,4 @@ The date calculation is done using what's called a “tabular Islamic calendar�
 
 ## Building
 
-This uses an [alternative](https://github.com/saljam/pebble) build system for the Pebble.
-The prerequisites are:
-- $PEBBLE_HOME env var needs to point to the Pebble SDK root.
-- elf2pbla in your path (install it using “go get github.com/saljam/pebble/elf2pbla”)
-
-Then just run `make` and you'll get a bundle in bin/hijri.pbw
+This now uses Pebble's SDK 2.0. Just run `pebble build` to build an app bundle.
