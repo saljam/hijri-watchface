@@ -1,7 +1,7 @@
 #include <wctype.h>
 #include <wchar.h>
 #include "hijri.h"
-#include "shaping.h"
+#include "unicode.h"
 
 #define secondsPerMinute 60
 #define secondsPerHour (60 * 60)
@@ -20,19 +20,6 @@ int daysPerYear[] = {
 	354, 355, 354, 354, 355, 354, 354, 354, 354, 355,
 	354, 354, 355, 354, 355, 354, 354, 355, 354, 354,
 	355, 354, 354, 355, 354, 355, 354, 354, 355, 354,
-};
-
-wchar_t easternDigit[] = {
-	L'\u0660',
-	L'\u0661',
-	L'\u0662',
-	L'\u0663',
-	L'\u0664',
-	L'\u0665',
-	L'\u0666',
-	L'\u0667',
-	L'\u0668',
-	L'\u0669',
 };
 
 char * hijriMonthsEn[] = {
@@ -79,62 +66,6 @@ wchar_t * arGregorianMonths[] = {
 	L"نوفمبر",
 	L"ديسمبر",
 };
-
-void strrev(wchar_t *start, int n)
-{
-	wchar_t *end = start;
-	while (*end !=  L'\0' && end < start+n) {
-		end++;
-	}
-	end--;
-	
-	while (start < end) {
-		wchar_t tmp = *start;
-		*start++ = *end;
-		*end-- = tmp;
-	}
-}
-
-int shape(wchar_t *in, int n)
-{
-	int rev = 0;
-	enum joiningType prev = U;
-	int i;
-	for (i = 0; i < n && in[i] != L'\0'; i++) {
-		// numeral
-		if (in[i] >= L'0' && in[i] <= L'9') {
-			int d = in[i] - L'0';
-			in[i] = easternDigit[d];
-		} else if (in[i] >= L'؀' && in[i] <= L'ۿ') {
-			rev = 1;
-			enum joiningType next = U;
-			if (in[i+1] >= L'؀' && in[i+1] <= L'ۿ') {
-				next = joinTable[in[i+1] - joinTableOffset];
-			}
-			wchar_t g;
-			if (prev & L && next & R) {
-				g = arConv[in[i] - joinTableOffset].medial;
-			} else if (prev & L) {
-				g = arConv[in[i] - joinTableOffset].final;
-			} else if (next & R) {
-				g = arConv[in[i] - joinTableOffset].initial;
-			} else {
-				g = arConv[in[i] - joinTableOffset].isolated;
-			}
-			prev = joinTable[in[i] - joinTableOffset];
-			in[i] = g;
-		} else {
-			prev = U;
-		}
-	}
-	
-	// Reverse the string if it has arabic. Not really good enough but does the job for date names on a watch...
-	if (rev) {
-		strrev(in, n);	
-	}
-
-	return i;
-}
 
 HijriDate unix2hijri(int t)
 {

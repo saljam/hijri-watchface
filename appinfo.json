@@ -1,10 +1,10 @@
 {
   "uuid": "0fd3e627-b9b0-4abf-aef3-54855d70f425",
-  "shortName": "hijri-watch",
-  "longName": "hijri-watch",
+  "shortName": "Hijri",
+  "longName": "Arabic Hijri",
   "companyName": "0x65.net",
-  "versionCode": 2,
-  "versionLabel": "2.0.0",
+  "versionCode": 3,
+  "versionLabel": "2.0.1",
   "watchapp": {
     "watchface": true
   },
