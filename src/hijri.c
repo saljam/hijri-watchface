@@ -3,22 +3,19 @@
 #include "hijri.h"
 #include "unicode.h"
 
-#define secondsPerMinute 60
-#define secondsPerHour (60 * 60)
-#define secondsPerDay (24 * 60 * 60)
-
-#define daysPer30Years (11*355 + 19*354)
-#define daysPer2Months (29+30)
-#define daysPerEvenMonth (30)
+int secondsPerDay    = (24 * 60 * 60);
+int daysPer30Years   = (11*355 + 19*354);
+int daysPer2Months   = (29+30);
+int daysPerEvenMonth = (29);
 
 // The closest start of the 30-year cycle to unix 0.
 // 1 Muharram 1380, 26 June 1960
-int zeroTime = -300326400;
+int zeroTime   = -300326400;
 int yearAtZero = 1380;
 
 int daysPerYear[] = {
-	354, 355, 354, 354, 355, 354, 354, 354, 354, 355,
-	354, 354, 355, 354, 355, 354, 354, 355, 354, 354,
+	354, 355, 354, 354, 355, 354, 355, 354, 354, 355,
+	354, 354, 355, 354, 354, 355, 354, 355, 354, 354,
 	355, 354, 354, 355, 354, 355, 354, 354, 355, 354,
 };
 
@@ -95,7 +92,7 @@ HijriDate unix2hijri(int t)
 		d -= daysPerEvenMonth;
 	}
 	
-	date.day = d;
+	date.day = d+1;
 	
 	return date;
 }
