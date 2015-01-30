@@ -3,8 +3,8 @@
   "shortName": "Hijri",
   "longName": "Arabic Hijri",
   "companyName": "0x65.net",
-  "versionCode": 3,
-  "versionLabel": "2.0.1",
+  "versionCode": "3.1",
+  "versionLabel": "3.1",
   "watchapp": {
     "watchface": true
   },
