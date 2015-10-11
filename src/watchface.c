@@ -16,8 +16,15 @@ TextLayer *hijriLayer;
 TextLayer *dateLayer;
 TextLayer *timeLayer;
 
-int wifmt(wchar_t *out, int d, int zeros)
-{
+enum Config {
+	DUMMY = 0,
+	DAYCORRECTION = 1,
+	GREGOREAN = 2,
+};
+
+int dayCorrection = 0;
+
+int wifmt(wchar_t *out, int d, int zeros) {
 	wchar_t *conv = L"0123456789";
 	int n = 0;
 	wchar_t buf[STRLEN+1], *p;
@@ -40,13 +47,12 @@ int wifmt(wchar_t *out, int d, int zeros)
 	return n;
 }
 
-void updateHijri(time_t t)
-{
+void updateHijri(time_t t) {
 	// Static because there's no heap. Don't judge me.
 	static wchar_t hijriTxt[STRLEN];
 	static char utfHijriTxt[STRLEN];
 	
-	HijriDate hijri = unix2hijri(t);
+	HijriDate hijri = unixtohijri(t, dayCorrection);
 	
 	// Can't use swprintf becaues it uses the heap. Until that's fixed we do it manually.
 	//swprintf(hijriTxt, sizeof(hijriTxt), L"%d %s", hijri.day, hijriMonths[hijri.month]);
@@ -61,8 +67,7 @@ void updateHijri(time_t t)
 	text_layer_set_text(hijriLayer, utfHijriTxt);
 }
 
-void updateGregorian(struct tm *t)
-{
+void updateGregorian(struct tm *t) {
 	static wchar_t dateTxt[STRLEN];
 	static char utfDateTxt[STRLEN];
 
@@ -77,8 +82,7 @@ void updateGregorian(struct tm *t)
 	text_layer_set_text(dateLayer, utfDateTxt);
 }
 
-void updateTime(struct tm *t)
-{
+void updateTime(struct tm *t) {
 	static wchar_t timeTxt[STRLEN];
 	static char utfTimeTxt[STRLEN];
 	
@@ -94,8 +98,7 @@ void updateTime(struct tm *t)
 	text_layer_set_text(timeLayer, utfTimeTxt);
 }
 
-void handleTick(struct tm *t, TimeUnits units_changed)
-{
+void handleTick(struct tm *t, TimeUnits units_changed) {
 	updateTime(t);
 	// Only update the date on a new day
 	if (t->tm_hour == 0 && t->tm_min == 0) {
@@ -104,8 +107,7 @@ void handleTick(struct tm *t, TimeUnits units_changed)
 	}
 }
 
-void initLayout()
-{
+void initLayout() {
 	window = window_create();
 	window_stack_push(window, true);
 	window_set_background_color(window, GColorBlack);
@@ -145,17 +147,34 @@ void initLayout()
 	layer_add_child((Layer *)window, (Layer *)dateLayer);
 }
 
-int main(void)
-{
-	initLayout();
-	
+void updateAll() {
 	time_t unix = time(NULL);
 	struct tm *local = localtime(&unix);
 	updateTime(local);
 	updateGregorian(local);
 	updateHijri(unix);
-	free(local);
-	
+	//free(local);
+}
+
+void handleAppMessage(DictionaryIterator *iter, void *context) {
+	Tuple *tuple = dict_read_first(iter);
+
+	while (tuple) {
+		switch (tuple->key) {
+		case DAYCORRECTION:
+			dayCorrection = tuple->value->int32;
+			break;
+		}
+		tuple = dict_read_next(iter);
+	}
+	updateAll();
+}
+
+int main(void) {
+	initLayout();
+	app_message_register_inbox_received(&handleAppMessage);
+	app_message_open(32, 0); // 32 should be enough...
+	updateAll();
 	tick_timer_service_subscribe(MINUTE_UNIT, &handleTick);
 	
 	app_event_loop();

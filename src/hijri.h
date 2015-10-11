@@ -7,4 +7,4 @@ typedef struct {
 extern wchar_t * hijriMonths[];
 extern wchar_t * arGregorianMonths[];
 
-HijriDate unix2hijri(int t);
+HijriDate unixtohijri(int t, int dayCorrection);

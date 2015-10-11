@@ -3,39 +3,46 @@
   "shortName": "Hijri",
   "longName": "Arabic Hijri",
   "companyName": "0x65.net",
-  "versionCode": "3.1",
-  "versionLabel": "3.1",
+  "versionCode": "5",
+  "versionLabel": "3.6",
   "watchapp": {
     "watchface": true
   },
+  "capabilities": [ "configurable" ],
   "appKeys": {
-    "dummy": 0
+    "DAYCORRECTION": 1,
+    "GREGORIAN": 2
   },
   "resources": {
     "media": [
-        {
-            "type": "font",
-            "characterRegex": "[ :؀-ۿﭐ-﷿ﹰ-﻿]",
-            "name": "FONT_KACSTBOOK_26",
-            "file": "fonts/KacstBook.ttf"
-        },
-        {
-            "type": "font",
-            "characterRegex": "[ :٠-٩]",
-            "name": "FONT_KACSTBOOK_SUBSET_55",
-            "file": "fonts/KacstBook.ttf"
-        },
-        {
-            "type": "font",
-            "name": "FONT_ROBOTO_CONDENSED_21",
-            "file": "fonts/Roboto-Condensed.ttf"
-        },
-        {
-            "type": "font",
-            "characterRegex": "[:0-9]",
-            "name": "FONT_ROBOTO_BOLD_SUBSET_49",
-            "file": "fonts/Roboto-Bold.ttf"
-        }
+      {
+        "type": "font",
+        "characterRegex": "[ :\u0600-\u06ff\ufb50-\ufdff\ufe70-\ufeff]",
+        "name": "FONT_KACSTBOOK_26",
+        "file": "fonts/KacstBook.ttf"
+      },
+      {
+        "type": "font",
+        "characterRegex": "[ :\u0660-\u0669]",
+        "name": "FONT_KACSTBOOK_SUBSET_55",
+        "file": "fonts/KacstBook.ttf"
+      },
+      {
+        "type": "font",
+        "name": "FONT_ROBOTO_CONDENSED_21",
+        "file": "fonts/Roboto-Condensed.ttf"
+      },
+      {
+        "type": "font",
+        "characterRegex": "[:0-9]",
+        "name": "FONT_ROBOTO_BOLD_SUBSET_49",
+        "file": "fonts/Roboto-Bold.ttf"
+      }
     ]
-  }
+  },
+  "targetPlatforms": [
+    "aplite",
+    "basalt"
+  ],
+  "sdkVersion": "3"
 }

@@ -64,11 +64,11 @@ wchar_t * arGregorianMonths[] = {
 	L"ديسمبر",
 };
 
-HijriDate unix2hijri(int t)
+HijriDate unixtohijri(int t, int dayCorrection)
 {
 	HijriDate date;
 	
-	int d = (t - zeroTime) / secondsPerDay;
+	int d = (t - zeroTime) / secondsPerDay + dayCorrection;
 	
 	int n = d / daysPer30Years;
 	date.year = 30 * n;
